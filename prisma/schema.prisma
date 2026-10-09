@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BookingStatus {
+  PENDING
+  HOLD
+  CONFIRMED
+  // CHECKED_IN
+  // CHECKED_OUT
+  // CANCELLED
+  // NO_SHOW
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+}
+
+model Booking {
+  id                Int      @id @default(autoincrement())
+  status            BookingStatus @default(PENDING)
+  numberOfGuests    Int
+  depositReceived   Boolean  @default(false)
+  depositAmount     Decimal?
+  breakfast         Boolean  @default(false)
+  breakfastNotes    String?
+  underSixteens     Int      @default(0)
+  breakfastTimeSlot String?
+  notes             String?
+  startDate         DateTime
+  endDate           DateTime
+  needsInvoice      Boolean  @default(false)
+
+  guestId Int
+  guest   Guest @relation(fields: [guestId], references: [id])
+
+  rooms   BookingRoom[]
+}
+
+model BookingRoom {
+  id           Int @id @default(autoincrement())
+  bookingId    Int
+  roomId       Int
+  roomConfigId Int
+
+  booking    Booking    @relation(fields: [bookingId], references: [id])
+  room       Room       @relation(fields: [roomId], references: [id])
+  roomConfig RoomConfig @relation(fields: [roomConfigId], references: [id])
+}
+
+model Room {
+  id          Int    @id @default(autoincrement())
+  name        String
+  maxCapacity Int
+
+  configs      RoomConfig[]
+  bookingRooms BookingRoom[]
+}
+
+model RoomConfig {
+  id     Int    @id @default(autoincrement())
+  roomId Int
+  name   String
+  sleeps Int
+
+  room         Room          @relation(fields: [roomId], references: [id])
+  bookingRooms BookingRoom[]
+}
+
+model Guest {
+  id         Int    @id @default(autoincrement())
+  name       String
+  phoneNumber String
+  cardNumber String?
+  newGuest   Boolean @default(true)
+
+  bookings   Booking[]
+}
+

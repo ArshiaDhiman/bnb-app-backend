@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres-db-bnb
+    environment:
+      POSTGRES_PASSWORD: bnb-app
+      POSTGRES_USER: bnb-app
+      POSTGRES_DB: bnb-app
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
